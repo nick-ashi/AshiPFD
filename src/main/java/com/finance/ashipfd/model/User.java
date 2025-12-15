@@ -3,6 +3,7 @@ package com.finance.ashipfd.model;
 // Jakarta persistence API (JPA) = standard ORM (object-relational mapping)
 // Tells Hibernate (our JPA impl) how to map this java class ot a database table
 import jakarta.persistence.*;
+import jakarta.persistence.Table;
 // Using lombok to auto-generate boilerplate code at compile time
 import lombok.AllArgsConstructor; // Gens a constructor with all params
 import lombok.Cleanup;
@@ -11,6 +12,7 @@ import lombok.NoArgsConstructor; // Generates a const with no params
 import java.time.LocalDateTime;
 
 @Entity
+@Table(name = "users")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
