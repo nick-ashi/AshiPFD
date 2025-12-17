@@ -1,10 +1,10 @@
 package com.finance.ashipfd.controller;
 
+import jakarta.validation.Valid;
 import com.finance.ashipfd.dto.AuthResponse;
 import com.finance.ashipfd.dto.RegisterRequest;
 import com.finance.ashipfd.model.User;
 import com.finance.ashipfd.service.UserService;
-import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;

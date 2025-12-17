@@ -19,7 +19,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    // Tells spring to manage this object as a Spring Bean (needs this filter chain to wokr)
+    // Tells spring to manage this object as a #BEAN get beaned (needs this filter chain to wokr)
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
