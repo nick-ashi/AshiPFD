@@ -1,5 +1,6 @@
 package com.finance.ashipfd.controller;
 
+import com.finance.ashipfd.dto.LoginRequest;
 import jakarta.validation.Valid;
 import com.finance.ashipfd.dto.AuthResponse;
 import com.finance.ashipfd.dto.RegisterRequest;
@@ -91,5 +92,29 @@ public class AuthController {
         // Return 201 created with resp body
         // ResponseEntity controls HTTP stat code
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    /**
+     * POST /api/auth/login
+     *
+     * Authenticating user and returning JWT
+     *
+     * REQ:
+     * {
+     *     "email": "john@gmail.com",
+     *     "password": "password"
+     * }
+     * RES:
+     * {
+     *     "token": "tokeninsertedherelol"
+     * }
+     * ** Using wildcard responsentity type -- this could probably be
+     * its own class LoginResponse or something, but for now j using a wildcard instead **
+     */
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest req) {
+        String token = userService.loginUser(req);
+
+        return ResponseEntity.ok(java.util.Map.of("token", token));
     }
 }

@@ -10,15 +10,31 @@ import java.time.LocalDateTime;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-    @ExceptionHandler(EmailAlreadyExistsException.class)
-    public ResponseEntity<ErrorResponse> handleEmailAlreadyExistsException(EmailAlreadyExistsException e) {
+
+    /**
+     * Helper method to build error responses cuz WE'RE DRY BABYYYYY
+     * @param ex The exception
+     * @param status The HTTP status
+     * @return ResponseEntity with ErrorResponse
+     */
+    private ResponseEntity<ErrorResponse> buildErrorResponse(Exception ex, HttpStatus status) {
         ErrorResponse error = new ErrorResponse(
                 LocalDateTime.now(),
-                HttpStatus.CONFLICT.value(),
-                HttpStatus.CONFLICT.getReasonPhrase(),
-                e.getMessage()
+                status.value(),
+                status.getReasonPhrase(),
+                ex.getMessage()
         );
 
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+        return ResponseEntity.status(status).body(error);
+    }
+
+    @ExceptionHandler(EmailAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleEmailAlreadyExistsException(EmailAlreadyExistsException ex) {
+        return buildErrorResponse(ex, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidCredentialsException(InvalidCredentialsException ex) {
+        return buildErrorResponse(ex, HttpStatus.UNAUTHORIZED);
     }
 }

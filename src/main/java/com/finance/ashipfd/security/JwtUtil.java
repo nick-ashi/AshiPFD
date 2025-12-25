@@ -1,6 +1,13 @@
 package com.finance.ashipfd.security;
 
+
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import javax.crypto.SecretKey;
+import java.util.Date;
 
 /**
  * JWTUTIL CLASS:
@@ -15,6 +22,64 @@ import org.springframework.stereotype.Component;
 @Component
 public class JwtUtil {
 
-    private static final String SECRET_KEY = "392d95804762a8d60c21dd8704d9299685cf24bb9ba291f43567488c5065bf51";
-    private static final long EXPIRATION_TIME = 86400000;
+    @Value("${jwt.secret}")
+    private String secretKey;
+    @Value("${jwt.expiration}")
+    private long expirationTime;
+
+    /**
+     * Returns a token
+     * @param email
+     * @param userId
+     * @return
+     */
+    public String generateToken(String email, Long userId) {
+        Date now = new Date();
+        Date expiryTime = new Date(now.getTime() + expirationTime);
+
+        SecretKey key = Keys.hmacShaKeyFor(secretKey.getBytes());
+
+        return Jwts.builder().subject(email)
+                .claim("userId", userId)
+                .issuedAt(now)
+                .expiration(expiryTime)
+                .signWith(key)
+                .compact();
+    }
+
+    public String getEmailFromToken(String token) {
+        SecretKey key = Keys.hmacShaKeyFor(secretKey.getBytes());
+
+        return Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getSubject();
+    }
+
+    public Long getUserIdFromToken(String token) {
+        SecretKey key = Keys.hmacShaKeyFor(secretKey.getBytes());
+
+        return Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .get("userId", Long.class);
+    }
+
+    public boolean validateToken(String token) {
+        try {
+            SecretKey key = Keys.hmacShaKeyFor(secretKey.getBytes());
+
+            Jwts.parser()
+                    .verifyWith(key)
+                    .build()
+                    .parseSignedClaims(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }

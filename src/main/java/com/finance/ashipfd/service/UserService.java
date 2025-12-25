@@ -1,12 +1,14 @@
 package com.finance.ashipfd.service;
 
 import com.finance.ashipfd.dto.RegisterRequest;
-import com.finance.ashipfd.exception.EmailAlreadyExistsException;
+import com.finance.ashipfd.dto.LoginRequest;
 import com.finance.ashipfd.repository.UserRepository;
 import com.finance.ashipfd.model.User;
-import jakarta.validation.constraints.Email;
+import com.finance.ashipfd.security.JwtUtil;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import com.finance.ashipfd.exception.EmailAlreadyExistsException;
+import com.finance.ashipfd.exception.InvalidCredentialsException;
 
 
 /**
@@ -21,6 +23,7 @@ import org.springframework.stereotype.Service;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtUtil jwtUtil;
 
     /**
      * CONSTRUCTOR FOR INJECTION
@@ -28,9 +31,10 @@ public class UserService {
      * @param userRepository
      * @param passwordEncoder
      */
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtUtil jwtUtil) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtUtil = jwtUtil;
     }
 
     /**
@@ -65,5 +69,31 @@ public class UserService {
     public User findByEmail(String email) {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+    /**
+     * Login user + gen JWT token
+     *
+     * 1. Find user by email
+     * 2. Verify pswd using BCrypt
+     * 3. Gen JWT token
+     * 4. Return le token
+     *
+     * @param req login creds
+     * @return JWT token string
+     * @throws InvalidCredentialsException if email not found or pswd wrong
+     */
+    public String loginUser(LoginRequest req) {
+        User user = userRepository.findByEmail(req.getEmail())
+                .orElseThrow(InvalidCredentialsException::new);
+
+        if (!passwordEncoder.matches(req.getPassword(),
+                user.getPassword())) {
+            throw new InvalidCredentialsException();
+        }
+
+        String token = jwtUtil.generateToken(user.getEmail(), user.getId());
+
+        return token;
     }
 }
