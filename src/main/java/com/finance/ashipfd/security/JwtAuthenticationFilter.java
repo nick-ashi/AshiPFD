@@ -44,8 +44,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse res,
             FilterChain filterChain
     ) throws ServletException, IOException {
+        System.out.println("==> JwtAuthenticationFilter is running for: "
+                + req.getRequestURI());
+
         // 1. Extract JWT token from Authorization header
         String header = req.getHeader("Authorization");
+        System.out.println("==> Authorization header: " + header);
 
         // Check if we're getting a valid header
         if (header == null || !header.startsWith("Bearer ")) {
@@ -58,9 +62,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = header.substring(7);
 
         try {
+            System.out.println("==> Attempting to validate token...");
             if (jwtUtil.validateToken(token)) {
+                System.out.println("==> Token is valid! Extracting user info...");
                 String email = jwtUtil.getEmailFromToken(token);
                 Long userId = jwtUtil.getUserIdFromToken(token);
+                System.out.println("==> Extracted userId: " + userId + ", email: " + email);
 
                 // Create auth object
                 UsernamePasswordAuthenticationToken auth =
@@ -76,6 +83,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 // Put auth in securityContext
                 SecurityContextHolder.getContext().setAuthentication(auth);
+                System.out.println("==> Authentication set in SecurityContext!");
+            } else {
+                System.out.println("==> Token validation returned FALSE");
             }
         } catch (Exception e) {
             // Token val FAILED
